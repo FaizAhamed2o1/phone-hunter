@@ -1,7 +1,24 @@
+/*
+* step 1: loadPhone which is an async function is created to load the phones from the API
+
+* Step 2: displayPhones function is created to display the phones from the API
+
+* Step 3: displayPhones function is called inside the loadPhone function with the phones argument. This phones argument is either an object or an array. Inside the displayPhones function, this is iterated with a forEach loop and HTML elements for the cards to show the phones are created. Then each phone's attributes are used where needed inside the generated HTML.
+
+* step 4: then handleSearch function is created. This function takes the value of the input field and send it to loadPhone function as parameter. This parameter is used inside the API link in order to search for specific phones from the API. but there is still a problem. When search a phone it displays results. when we try to search again, the results from the previous doesn't vanish. To vanish them, inside the displayPhones function we added this code:
+* 'phonesContainer.innerHTML = "";'
+
+* Step 5: We don't want to show all the phones at ones when we search for them. We want to show 12 phones at a time.
+todo: So what we do is we slice the phones array inside the displayPhones function and shorten it to 12. Then we add showAll button in the html. We get element's ID inside js and apply conditional rendering. The condition is if the size of phones array is bigger than 12, then we show the button. Else, initially and if the phones array's length is smaller than 12, we don't show the button.
+
+* Step 6: Adding a loading spinner and showing it till the data has been loaded.
+todo: The function named "toggleLoadingSpinner" is created to handle the toggle of the loading spinner. It has a parameter which will receive a boolean argument. if the parameter is true, it will show the spinner and if it's false the spinner will be hidden. The function then is called inside the handleClick function since the loading will start the moment we click the search button. Loading will end after all the data are loaded and showed on the screen. That's why it's again called with a "false" argument at the end of the display phones function 
+*/
+
 // ! Function to load the phones from the API
-const loadPhone = async () => {
+const loadPhone = async (searchedPhone) => {
   const response = await fetch(
-    "https://openapi.programming-hero.com/api/phones?search=iphone"
+    `https://openapi.programming-hero.com/api/phones?search=${searchedPhone}`
   );
   const data = await response.json();
   const phones = data.data;
@@ -11,12 +28,24 @@ const loadPhone = async () => {
 
 // ! Function to display each phone from the loadPhone function
 const displayPhones = (phones) => {
-  // Grabbing the container to append the phoneCard
+  console.log(phones.length);
+  // todo: Grabbing the container to append the phoneCard
   const phonesContainer = document.getElementById("phones-container");
 
+  // todo: Clearing the container to show new search results and removing the previous search results
+  phonesContainer.innerHTML = "";
+
+  // todo: Condition to check if the phones parameter has the length of more than 12 and show or hide the showAll button according to it.
+  const showAllButton = document.getElementById("show-all-btn");
+  phones.length > 12
+    ? showAllButton.classList.remove("hidden")
+    : showAllButton.classList.add("hidden");
+
+  // todo: Slicing the phones array to show 12 phones at a time.
+  phones = phones.slice(0, 12);
+
   phones.forEach((phone) => {
-    console.log(phone);
-    // Creating the card to individually show the phones
+    // todo: Creating the card to individually show the phones
     const phoneCard = document.createElement("div");
     phoneCard.classList = `card bg-base-100  shadow-xl`;
     phoneCard.innerHTML = `
@@ -41,6 +70,23 @@ const displayPhones = (phones) => {
 
     phonesContainer.appendChild(phoneCard);
   });
+
+  // todo: turn off the loading spinner after data has been loaded
+  toggleLoadingSpinner(false);
 };
 
-loadPhone();
+// ! Function to handle search button
+const handleSearch = () => {
+  toggleLoadingSpinner(true);
+  const searchField = document.getElementById("search-field");
+  const searchText = searchField.value;
+  loadPhone(searchText);
+};
+
+// ! Function to handle the toggle of loading spinner
+const toggleLoadingSpinner = (isLoading) => {
+  const loader = document.getElementById("loader");
+  isLoading
+    ? loader.classList.remove("hidden")
+    : loader.classList.add("hidden");
+};
