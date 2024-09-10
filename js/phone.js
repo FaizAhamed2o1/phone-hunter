@@ -16,18 +16,18 @@ todo: The function named "toggleLoadingSpinner" is created to handle the toggle 
 */
 
 // ! Function to load the phones from the API
-const loadPhone = async (searchedPhone) => {
+const loadPhone = async (searchedPhone, isShowAll) => {
   const response = await fetch(
     `https://openapi.programming-hero.com/api/phones?search=${searchedPhone}`
   );
   const data = await response.json();
   const phones = data.data;
 
-  displayPhones(phones);
+  displayPhones(phones, isShowAll);
 };
 
 // ! Function to display each phone from the loadPhone function
-const displayPhones = (phones) => {
+const displayPhones = (phones, isShowAll) => {
   console.log(phones.length);
   // todo: Grabbing the container to append the phoneCard
   const phonesContainer = document.getElementById("phones-container");
@@ -35,14 +35,18 @@ const displayPhones = (phones) => {
   // todo: Clearing the container to show new search results and removing the previous search results
   phonesContainer.innerHTML = "";
 
-  // todo: Condition to check if the phones parameter has the length of more than 12 and show or hide the showAll button according to it.
+  // todo: Condition to check if the phones parameter has the length of more than 12 and show or hide the showAll button according to it. also if the showAll button is pressed.
   const showAllButton = document.getElementById("show-all-btn");
-  phones.length > 12
-    ? showAllButton.classList.remove("hidden")
-    : showAllButton.classList.add("hidden");
+  if (phones.length > 12 && !isShowAll) {
+    showAllButton.classList.remove("hidden");
+  } else {
+    showAllButton.classList.add("hidden");
+  }
 
-  // todo: Slicing the phones array to show 12 phones at a time.
-  phones = phones.slice(0, 12);
+  // todo: display 12 phones if isShowAll is not true(it can be anything other than true eg: false, undefined etc)
+  if (!isShowAll) {
+    phones = phones.slice(0, 12);
+  }
 
   phones.forEach((phone) => {
     // todo: Creating the card to individually show the phones
@@ -76,11 +80,11 @@ const displayPhones = (phones) => {
 };
 
 // ! Function to handle search button
-const handleSearch = () => {
+const handleSearch = (isShowAll) => {
   toggleLoadingSpinner(true);
   const searchField = document.getElementById("search-field");
   const searchText = searchField.value;
-  loadPhone(searchText);
+  loadPhone(searchText, isShowAll);
 };
 
 // ! Function to handle the toggle of loading spinner
@@ -89,4 +93,10 @@ const toggleLoadingSpinner = (isLoading) => {
   isLoading
     ? loader.classList.remove("hidden")
     : loader.classList.add("hidden");
+};
+
+// ! Function to handle showAll button
+const handleShowAllButton = () => {
+  // todo: Jehetu amra show all button ta tokhon dekhai handleSearch button amra click kori, tai amra ei function e argument pass korsi ar ei function ta re dhorsi.
+  handleSearch(true);
 };
